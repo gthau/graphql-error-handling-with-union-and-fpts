@@ -23,8 +23,8 @@
     "typescript": "4.5.4"
   },
   "scripts": {
-    "start": "ts-node index.ts",
-    "dev": "ts-node-dev index.ts",
+    "start": "ts-node src/index.ts",
+    "dev": "ts-node-dev src/index.ts",
     "graphql:generate": "graphql-codegen --config codegen.yml"
   },
   "packageManager": "yarn@3.1.1"
