@@ -1,0 +1,22 @@
+{
+  "name": "@gthau/graphql-error-handling-with-union-and-fpts",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Ghislain Thau",
+  "license": "MIT",
+  "dependencies": {
+    "@envelop/core": "^1.7.1",
+    "@graphql-tools/schema": "^8.3.1",
+    "graphql": "16.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "15.6.1",
+    "ts-node": "^10.4.0",
+    "typescript": "4.5.4"
+  },
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "packageManager": "yarn@3.1.1"
+}
