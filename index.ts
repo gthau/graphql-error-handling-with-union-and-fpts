@@ -1,13 +1,11 @@
-import { createServer } from 'http';
 import { envelop, useLogger, useSchema, useTiming } from '@envelop/core';
+import { loadFilesSync } from "@graphql-tools/load-files";
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import { createServer } from 'http';
+import { join } from 'path';
 
 const schema = makeExecutableSchema({
-  typeDefs: /* GraphQL */ `
-    type Query {
-      hello: String!
-    }
-  `,
+  typeDefs: loadFilesSync(join(__dirname, './typedefs.graphql')),
   resolvers: {
     Query: {
       hello: () => 'World',
