@@ -1,3 +1,4 @@
 type Query {
   hello: String!
+  queryWithArgs(arg1: String!, arg2: Int): String
 }
