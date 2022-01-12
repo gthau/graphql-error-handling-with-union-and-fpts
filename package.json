@@ -12,6 +12,11 @@
     "graphql": "16.2.0"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "3.1.0",
+    "@graphql-codegen/cli": "2.3.1",
+    "@graphql-codegen/graphql-modules-preset": "2.1.4",
+    "@graphql-codegen/typescript": "2.4.2",
+    "@graphql-codegen/typescript-resolvers": "2.4.3",
     "@types/node": "15.6.1",
     "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.8",
@@ -19,7 +24,8 @@
   },
   "scripts": {
     "start": "ts-node index.ts",
-    "dev": "ts-node-dev index.ts"
+    "dev": "ts-node-dev index.ts",
+    "graphql:generate": "graphql-codegen --config codegen.yml"
   },
   "packageManager": "yarn@3.1.1"
 }
