@@ -3,13 +3,12 @@ import { loadFilesSync } from "@graphql-tools/load-files";
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createServer } from 'http';
 import { join } from 'path';
+import { queryResolvers } from './resolvers';
 
 const schema = makeExecutableSchema({
   typeDefs: loadFilesSync(join(__dirname, './typedefs.graphql')),
   resolvers: {
-    Query: {
-      hello: () => 'World',
-    },
+    ...queryResolvers,
   },
 });
 
