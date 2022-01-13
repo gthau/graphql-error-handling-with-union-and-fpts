@@ -1,4 +1,9 @@
+type Entity {
+  id: ID!
+  name: String!
+}
+
 type Query {
   hello: String!
-  queryWithArgs(arg1: String!, arg2: Int): String
+  entity(id: ID!, userId: ID!): Entity
 }
