@@ -1,5 +1,8 @@
+import { pipe } from 'fp-ts/lib/function';
+import * as T from 'fp-ts/lib/Task';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { getEntityForUser } from '../data/service';
 import { Resolvers } from '../generated/graphql';
-import { getEntity, isUserAllowedForEntity, getUser } from '../data/service';
 
 export const queryResolvers: Resolvers = {
   Query: {
@@ -7,14 +10,14 @@ export const queryResolvers: Resolvers = {
 
     entity: (_, args, __) => {
       const { id: entityId, userId } = args;
-      const entity = getEntity(Number(entityId));
-      const user = getUser(Number(userId));
 
-      return (!entity || !user)
-        ? null
-        : isUserAllowedForEntity(user, entity)
-          ? entity
-          : null;
+      return pipe(
+        getEntityForUser(Number(entityId), Number(userId)),
+        TE.fold(
+          (_) => T.of(null),
+          T.of,
+        )
+      )();
     }
   },
 

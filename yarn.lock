@@ -1212,6 +1212,7 @@ __metadata:
     "@graphql-codegen/typescript": 2.4.2
     "@graphql-codegen/typescript-resolvers": 2.4.3
     "@types/node": 15.6.1
+    fp-ts: ^2.11.7
     graphql-yoga: 1.18.3
     ts-node: ^10.4.0
     ts-node-dev: ^1.1.8
@@ -3168,6 +3169,13 @@ __metadata:
   version: 0.2.0
   resolution: "forwarded@npm:0.2.0"
   checksum: fd27e2394d8887ebd16a66ffc889dc983fbbd797d5d3f01087c020283c0f019a7d05ee85669383d8e0d216b116d720fc0cef2f6e9b7eb9f4c90c6e0bc7fd28e6
+  languageName: node
+  linkType: hard
+
+"fp-ts@npm:^2.11.7":
+  version: 2.11.7
+  resolution: "fp-ts@npm:2.11.7"
+  checksum: 8d841e19cc4f9c799bb633b137af322e90f11d0176583ffa7c351f33be01b683bfa2f044f7d07893b2f9c6fe7baed8e0bce5c5346f10bae0237a28252d71f357
   languageName: node
   linkType: hard
 

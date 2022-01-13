@@ -6,6 +6,7 @@
   "author": "Ghislain Thau",
   "license": "MIT",
   "dependencies": {
+    "fp-ts": "^2.11.7",
     "graphql-yoga": "1.18.3"
   },
   "devDependencies": {
