@@ -1,9 +1,42 @@
+interface Error {
+  message: String!
+}
+
+type InputFieldValidation {
+  field: String!
+  message: String!
+}
+
+type InvalidInputError implements Error {
+  message: String!
+  inputs: [InputFieldValidation!]!
+}
+
+type NotFoundError implements Error {
+  message: String!
+}
+
+type UnknownError implements Error {
+  message: String!
+}
+
+type NotAllowedError implements Error {
+  message: String!
+}
+
 type Entity {
   id: ID!
   name: String!
 }
 
+union EntityResult =
+  | Entity
+  | NotFoundError
+  | NotAllowedError
+  | InvalidInputError
+  | UnknownError
+
 type Query {
   hello: String!
-  entity(id: ID!, userId: ID!): Entity
+  entity(id: ID!, userId: ID!): EntityResult!
 }

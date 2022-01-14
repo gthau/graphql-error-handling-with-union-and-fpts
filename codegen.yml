@@ -4,8 +4,19 @@ documents: null
 generates:
   src/generated/graphql.ts:
     plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - add:
+          content: "import { WrappedError } from './src/errors';"
+      - add:
+          content: "import { InputFieldError, InvalidInputError, NotFoundError, NotAllowedError, UnknownError } from './src/errors/wrapped-error';"
       - "typescript"
       - "typescript-resolvers"
     config:
       mappers:
+        InputFieldValidation: 'InputFieldError'
+        InvalidInputError: 'WrappedError<InvalidInputError>'
+        NotFoundError: 'WrappedError<NotFoundError>'
+        NoUserRightsError: 'WrappedError<NoUserRightsError>'
+        UnknownError: 'WrappedError<UnknownError>'
         Entity: './src/data/types#Entity'
