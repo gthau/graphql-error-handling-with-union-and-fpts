@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "ts-node-dev src/index.ts",
+    "dev": "ts-node-dev --transpile-only --respawn --inspect=4321 src/index.ts",
     "graphql:generate": "graphql-codegen --config codegen.yml"
   },
   "packageManager": "yarn@3.1.1"
