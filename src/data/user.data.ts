@@ -1,6 +1,6 @@
-import { Country, User } from './types';
+import { Country, IUser } from './types';
 
-export const users: User[] = [
+export const users: IUser[] = [
   {
     id: 1,
     name: 'User #1',

@@ -1,6 +1,6 @@
-import { Country, Entity } from './types';
+import { Country, IEntity } from './types';
 
-export const entities: Entity[] = [
+export const entities: IEntity[] = [
   {
     id: 1,
     name: 'Entity #1',
