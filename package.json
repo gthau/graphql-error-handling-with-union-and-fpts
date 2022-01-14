@@ -6,9 +6,9 @@
   "author": "Ghislain Thau",
   "license": "MIT",
   "dependencies": {
-    "error-cause": "^1.0.3",
     "fp-ts": "^2.11.7",
-    "graphql-yoga": "1.18.3"
+    "graphql-yoga": "1.18.3",
+    "pony-cause": "^1.1.1"
   },
   "devDependencies": {
     "@graphql-codegen/add": "3.1.0",
