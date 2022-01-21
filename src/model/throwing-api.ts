@@ -1,5 +1,5 @@
 import { entities } from './data/entity.data';
-import { Entity, User } from './types';
+import { Entity, User, UserId } from './types';
 import { users } from './data/user.data';
 
 export const fetchEntity = async (id: number): Promise<Entity> => {
@@ -8,7 +8,7 @@ export const fetchEntity = async (id: number): Promise<Entity> => {
   return new Entity(entity);
 }
 
-export const fetchUser = async (id: number): Promise<User> => {
+export const fetchUser = async (id: UserId): Promise<User> => {
   const user = users.find(u => u.id === id);
   if (!user) throw new Error(`User ${id} not found`);
   return new User(user);

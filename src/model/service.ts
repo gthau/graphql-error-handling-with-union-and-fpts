@@ -3,7 +3,7 @@ import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { newErrorWithCause, NotAllowedError, NotFoundError } from '../errors/errors';
 import { fetchEntity, fetchUser } from './throwing-api';
-import { Entity, User } from './types';
+import { Entity, User, UserId } from './types';
 
 
 export const getEntity = (id: number): TE.TaskEither<NotFoundError, Entity | undefined> =>
@@ -12,7 +12,7 @@ export const getEntity = (id: number): TE.TaskEither<NotFoundError, Entity | und
     newErrorWithCause(NotFoundError),
   );
 
-export const getUser = (id: number): TE.TaskEither<Error, User | undefined> =>
+export const getUser = (id: UserId): TE.TaskEither<Error, User | undefined> =>
   TE.tryCatch(
     () => fetchUser(id),
     newErrorWithCause(NotFoundError),
@@ -29,7 +29,7 @@ export const isUserAllowedForEntityAsError = (user: User, entity: Entity): E.Eit
     )
   );
 
-export const getEntityForUser = (id: number, userId: number): TE.TaskEither<NotFoundError | NotAllowedError, Entity | undefined> =>
+export const getEntityForUser = (id: number, userId: UserId): TE.TaskEither<NotFoundError | NotAllowedError, Entity | undefined> =>
   pipe(
     getUser(userId),
     TE.bindTo('user'),

@@ -2,52 +2,52 @@ import { Country, IUser } from '../types';
 
 export const users: IUser[] = [
   {
-    id: 1,
+    id: 'u-1',
     name: 'User #1',
     country: Country.AUSTRALIA,
   },
   {
-    id: 2,
+    id: 'u-2',
     name: 'User #2',
     country: Country.CANADA,
   },
   {
-    id: 3,
+    id: 'u-3',
     name: 'User #3',
     country: Country.COLOMBIA,
   },
   {
-    id: 4,
+    id: 'u-4',
     name: 'User #4',
     country: Country.FRANCE,
   },
   {
-    id: 5,
+    id: 'u-5',
     name: 'User #5',
     country: Country.NEW_ZEALAND,
   },
   {
-    id: 6,
+    id: 'u-6',
     name: 'User #6',
     country: Country.PERU,
   },
   {
-    id: 7,
+    id: 'u-7',
     name: 'User #7',
     country: Country.SPAIN,
   },
   {
-    id: 8,
+    id: 'u-8',
     name: 'User #8',
     country: Country.UNITED_STATES,
   },
   {
-    id: 9,
+    id: 'u-9',
     name: 'User #9',
     country: Country.AUSTRALIA,
   },
   {
-    id: 10,
+    id: 'u-10',
     name: 'User #10',
     country: Country.FRANCE,
   },

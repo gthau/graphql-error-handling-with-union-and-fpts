@@ -28,14 +28,15 @@ export class Entity implements IEntity {
   }
 }
 
+export type UserId = `u-${number}`;
 export interface IUser {
-  id: number;
+  id: UserId;
   name: string;
   country: NonNullable<Country>;
 }
 
 export class User implements IUser {
-  id: number;
+  id: UserId;
   name: string;
   country: NonNullable<Country>;
 

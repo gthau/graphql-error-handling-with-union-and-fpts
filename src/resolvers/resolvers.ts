@@ -7,7 +7,7 @@ import { isWrappedError, taskWrappedError, Type, wrappedErrorMsg } from '../erro
 import { Resolvers } from '../generated/graphql';
 import { getEntityForUser } from '../model/service';
 import { Entity } from '../model/types';
-import { validate, validateIsNumber } from './validation';
+import { validate, validateIsNumber, validateIsUserId } from './validation';
 
 const errorTypesCommonResolvers = <E extends ErrorWithCause<Error>>(errorClass: Type<E>) => ({
   __isTypeOf: isWrappedError(errorClass),
@@ -20,9 +20,10 @@ export const queryResolvers: Resolvers = {
 
     entity: (_, args, __) => {
       const { id: entityId, userId } = args;
+
       const validatedInputs = validate({
-        entityId: validateIsNumber(entityId, 'id'),
-        userId: validateIsNumber(userId, 'userId'),
+        entityId: validateIsNumber(entityId, 'entityId'),
+        userId: validateIsUserId(userId, 'userId'),
       });
 
       return pipe(

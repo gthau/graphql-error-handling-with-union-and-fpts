@@ -4,19 +4,29 @@ import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
 import { InputFieldError, InvalidInputError } from '../errors/errors';
+import { UserId } from '../model/types';
 
-export const validateIsNumber = (v: string | null | undefined, inputName: string) =>
-  pipe(
-    O.fromNullable(v),
-    O.map(Number),
-    O.chain(O.fromPredicate(Number.isInteger)),
-    E.fromOption(() => [
-      {
-        field: inputName,
-        message: `${inputName} input is not a number`,
-      },
-    ])
-  );
+export const validateInput = <T>(
+  predFn: (v: unknown) => v is T,
+  errorMsg: string,
+) =>
+ (v: unknown, inputName: string) =>
+    pipe(
+      O.fromNullable(v),
+      O.chain(O.fromPredicate(predFn)),
+      E.fromOption(() => [
+        {
+          field: inputName,
+          message: `${inputName} input ${errorMsg}`,
+        },
+      ])
+    );
+
+export const isNumberId = (v: unknown): v is number => Number.isInteger(Number(v));
+export const validateIsNumber = validateInput(isNumberId, 'is not a Number');
+
+export const isUserId = (v: unknown): v is UserId => /u-\d+/.test(String(v));
+export const validateIsUserId = validateInput(isUserId, 'is not in the form u-<number>');
 
 export const validate = (inputs: Record<string, E.Either<InputFieldError[], any>>) => {
   const validation = E.getApplicativeValidation(getSemigroup<InputFieldError>());
