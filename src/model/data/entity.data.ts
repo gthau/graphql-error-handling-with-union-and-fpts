@@ -1,4 +1,4 @@
-import { Country, IEntity } from './types';
+import { Country, IEntity } from '../types';
 
 export const entities: IEntity[] = [
   {

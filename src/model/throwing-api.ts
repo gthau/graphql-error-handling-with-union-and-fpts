@@ -1,6 +1,6 @@
-import { entities } from './entity.data';
+import { entities } from './data/entity.data';
 import { Entity, User } from './types';
-import { users } from './user.data';
+import { users } from './data/user.data';
 
 export const fetchEntity = async (id: number): Promise<Entity> => {
   const entity = entities.find(e => e.id === id);
