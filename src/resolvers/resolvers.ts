@@ -1,8 +1,8 @@
 import { pipe } from 'fp-ts/lib/function';
 import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
-import { getEntityForUser } from '../data/service';
-import { Entity } from '../data/types';
+import { getEntityForUser } from '../model/service';
+import { Entity } from '../model/types';
 import { InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
 import { isWrappedError, taskWrappedError, wrappedErrorMsg } from '../errors/wrapped-error';
 import { Resolvers } from '../generated/graphql';
