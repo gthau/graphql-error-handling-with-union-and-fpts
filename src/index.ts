@@ -4,6 +4,9 @@ import { queryResolvers as resolvers } from './resolvers/resolvers';
 const server = new GraphQLServer({
   typeDefs: './src/typedefs.graphql',
   resolvers,
+  resolverValidationOptions: {
+    requireResolversForResolveType: false,
+  }
 } as any);
 
 server.start(() => console.log('Server is running on http://localhost:4000'))
