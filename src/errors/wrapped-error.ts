@@ -1,4 +1,3 @@
-import { pipe } from 'fp-ts/lib/function';
 import * as T from 'fp-ts/lib/Task';
 
 export interface Type<T> extends Function {
@@ -22,6 +21,9 @@ export const isWrappedError =
       v.err instanceof errorClass
     );
 
-export const wrappedErrorMsg = <E extends Error>(wrappedErr: WrappedError<E>) => wrappedErr.err.message;
+export const wrappedErrorField =
+  <E extends Error>(errorClass: Type<E>) =>
+    <TKey extends keyof E>(prop: TKey) =>
+      (wrappedErr: WrappedError<E>): E[TKey] => wrappedErr.err[prop];
 
-export const taskWrappedError = <E extends Error>(err: E) => pipe(err, wrappedError, T.of);
+export const taskWrappedError = <E extends Error>(err: E) => T.of(wrappedError(err));

@@ -3,7 +3,7 @@ import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { ErrorWithCause } from 'pony-cause';
 import { InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
-import { isWrappedError, taskWrappedError, Type, wrappedErrorMsg } from '../errors/wrapped-error';
+import { isWrappedError, taskWrappedError, Type, wrappedErrorField } from '../errors/wrapped-error';
 import { Resolvers } from '../generated/graphql';
 import { getEntityForUser } from '../model/service';
 import { Entity } from '../model/types';
@@ -11,7 +11,7 @@ import { validate, validateIsNumber, validateIsUserId } from './validation';
 
 const errorTypesCommonResolvers = <E extends ErrorWithCause<Error>>(errorClass: Type<E>) => ({
   __isTypeOf: isWrappedError(errorClass),
-  message: wrappedErrorMsg,
+  message: wrappedErrorField(errorClass)('message'),
 });
 
 export const queryResolvers: Resolvers = {
@@ -44,17 +44,11 @@ export const queryResolvers: Resolvers = {
     name: (parent) => parent.name,
   },
 
-  NotFoundError: {
-    ...errorTypesCommonResolvers(NotFoundError),
-  },
-  NotAllowedError: {
-    ...errorTypesCommonResolvers(NotAllowedError),
-  },
+  NotFoundError: errorTypesCommonResolvers(NotFoundError),
+  NotAllowedError: errorTypesCommonResolvers(NotAllowedError),
+  UnknownError: errorTypesCommonResolvers(UnknownError),
   InvalidInputError: {
     ...errorTypesCommonResolvers(InvalidInputError),
-    inputs: (parent) => parent.err.validations,
-  },
-  UnknownError: {
-    ...errorTypesCommonResolvers(UnknownError),
+    inputs: wrappedErrorField(InvalidInputError)('validations'),
   },
 };
