@@ -13,3 +13,11 @@ export const fetchUser = async (id: UserId): Promise<User> => {
   if (!user) throw new Error(`User ${id} not found`);
   return new User(user);
 }
+
+export const isUserAllowedForEntity = async (user: User, entity: Entity): Promise<boolean> => {
+  try {
+    return !entity.restrictions.includes(user.country);
+  } catch (e) {
+    throw e;
+  }
+}
