@@ -31,7 +31,7 @@ Contrary to REST, GraphQL does not use Status Code to differentiate a successful
 # GraphQL default error handling
 
 
-In GraphQL, you'll get a 5xx error in case the server is not available at all, but for other exceptions you'll get the standard error handling mechanism from GraphQL: in the JSON you receive there is
+In GraphQL, you'll get a 5xx error in case the server is not available at all, but for other exceptions you'll get the standard error handling mechanism from GraphQL: in the JSON you receive there is:
 - a `data` key which contains the data corresponding to the GraphQL operation (query, mutation, subscription) invoked and
 - an `errors` key which contains an array of errors returned by the server, with a message and location.
 
@@ -51,7 +51,7 @@ GraphQL has support for Union types (only for types, not yet for Input). Therefo
 Benefits:
 
 1. Type-safety: the errors are also typed
-2. The consumer cannot ignore the errors (although there is a way to [bulk-handle](#bulk-and-specific-errors-handling) them to ease the error handling on the client-side)
+2. The consumer cannot ignore the errors
 3. Self-documented: the operation signature includes all possible cases (result and errors) therefore less documentation is required to explain the possible error cases
 4. The _unhappy_ paths are not unexpected anymore, there are just other possible results
 
@@ -229,54 +229,12 @@ NotFoundError: 'import("./src/errors").WrappedError<import("./src/errors").NotFo
 
 This `codegen` configuration generates the Typescript types from the Schema and the proper signatures for the operations (query/mutation/subscription) and types resolvers. Now we have type safety at compile-time and type inference and hints in the code editor.
 
-Having a quick look at the generated file, we see everything is correctly typed:
-
-```ts
-// in the generated file
-/** Mapping between all available schema types and the resolvers types */
-export type ResolversTypes = {
-  Query: ResolverTypeWrapper<{}>;
-  EntityResult: ResolversTypes['Entity'] | ResolversTypes['InvalidInputError'] | ResolversTypes['NotAllowedError'] | ResolversTypes['NotFoundError'] | ResolversTypes['UnknownError'];
-  Entity: ResolverTypeWrapper<Entity>;
-  NotFoundError: ResolverTypeWrapper<E.WrappedError<E.NotFoundError>>;
-  // ... more types
-};
-
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  entity?: Resolver<ResolversTypes['EntityResult'], ParentType, ContextType, RequireFields<QueryEntityArgs, 'id' | 'userId'>>;
-};
-
-export type EntityResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['EntityResult'] = ResolversParentTypes['EntityResult']> = {
-  __resolveType: TypeResolveFn<'Entity' | 'InvalidInputError' | 'NotAllowedError' | 'NotFoundError' | 'UnknownError', ParentType, ContextType>;
-};
-
-export type EntityResolvers<ContextType = any, ParentType extends ResolversParentTypes['Entity'] = ResolversParentTypes['Entity']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type NotFoundErrorResolvers<ContextType = any, ParentType extends ResolversParentTypes['NotFoundError'] = ResolversParentTypes['NotFoundError']> = {
-  message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-// ... same for the other Error types we have defined ...
-
-export type Resolvers<ContextType = any> = {
-  Query?: QueryResolvers<ContextType>;
-  Entity?: EntityResolvers<ContextType>;
-  NotFoundError?: NotFoundErrorResolvers<ContextType>;
-  // ... more resolvers
-};
-```
-
 ## Help the GraphQL engine decide which type to return
 
 In the first version of the query resolver, we were returning objects that matched the GraphQL types and were tagged with the `__typename` so the GraphQL engine could just return those without the need to have type resolvers.
-But now, we are returning different objects that will be mapped to the proper GraphQL type. And those objects are not tagged with `__typename`. Therefore how can the GraphQL engine know how to map?
+But now, we are returning different objects that will be mapped to the proper GraphQL type. And those objects are not tagged with `__typename`. So how does the GraphQL engine know to map the value returned by the query resolver?
 
-In the `codegen` configuration, we have defined mappers between the GraphQL schema types and the Typescript types. But this is not used at runtime. This configuration is only used by GraphQL Code Generator to generate the proper types and resolvers signatures.
+In the `codegen` configuration, we have defined mappers between the GraphQL schema types and the Typescript types. But this is not used at runtime. This configuration is only used by GraphQL Code Generator to generate the proper types and resolvers signatures so that you get compile-time type safety and code editor hints.
 
 The type resolvers have a special field resolver for this purpose: `__isTypeOf` is a field resolver function on each of the GraphQL type resolver of the query union type result. This field resolver is executed on all types that form the query resolver's result Union type: when one returns `true`, the GraphQL engine will use this type resolver to generate the proper result object.
 
@@ -375,7 +333,7 @@ export async function fetchEntity(id: number): Promise<Entity> {
   return new Entity(entity);
 }
 
-// returns a User or throw
+// returns a User or throws
 export async function fetchUser(id: UserId): Promise<User> {
   const user = users.find(u => u.id === id);
   if (!user) {
@@ -413,20 +371,40 @@ Not only have we made our API safer code-wise, but also better from a documentat
 Now that we have dealt with the data fetching, let's consume this data. The first functionality we add is checking the user permissions. In this simple example, we don't query an external service, we got the data in the Entity and User types. We can create the checking function without worrying about whether the user or entity is present since this will be handled by the algebraic data types (Either, TaskEither, Option). We can also decide to represent the absence of permission as an Error: in the second function, we use the `Either.fromPredicate` to transform the `false` value into a custom `NotAllowedError`:
 
 ```ts
-export const isUserAllowedForEntity = (user: User, entity: Entity): boolean => !entity.restrictions.includes(user.country);
+// unsafe API
+const isUserAllowedForEntity = async (user: User, entity: Entity): Promise<boolean> => {
+  try {
+    return !entity.restrictions.includes(user.country);
+  } catch (e) {
+    throw e;
+  }
+}
+
+// safe API
+export const getIsUserAllowedForEntity =
+  (user: User, entity: Entity): TE.TaskEither<UnknownError, boolean> =>
+    TE.tryCatch(
+      () => isUserAllowedForEntity(user, entity),
+      (e) => new UnknownError(e.message),
+    );
+
+const isNotAllowedAsError = (errorMsg: string) =>
+  (isAllowed: boolean): TE.TaskEither<NotAllowedError, boolean> =>
+    pipe(
+      isAllowed,
+      TE.fromPredicate(
+        Boolean,
+        (_) => new NotAllowedError(errorMsg),
+      ),
+    );
 
 export const isUserAllowedForEntityAsError = (user: User) =>
-  (entity: Entity): E.Either<NotAllowedError, boolean> =>
+  (entity: Entity): TE.TaskEither<NotAllowedError | UnknownError, boolean> =>
     pipe(
-      isUserAllowedForEntity(user, entity),
-      E.fromPredicate(
-        Boolean,
-        (_) => new NotAllowedError(`User ${user.id} isn't allowed to access entity ${entity.id}`),
-      )
+      getIsUserAllowedForEntity(user, entity),
+      TE.chainW(isNotAllowedAsError(`User ${user.id} isn't allowed to access entity ${entity.id}`)),
     );
 ```
-
-*Note*: if the user permission function was also asynchronous (e.g. a database call, retrieve from an async cache, etc.) it would return a `TaskEither` instead of an `Either` so we would have used `TaskEither.fromPredicate` instead of `Either.fromPredicate`.
 
 Now that both the Entity and User permission fetching calls are safer, we can combine them to create the Entity fetching function with User permission check incorporated:
 
@@ -437,10 +415,12 @@ export const getEntityForUser = (
 ): TE.TaskEither<NotFoundError | NotAllowedError, Entity> =>
   pipe(
     getUser(userId),
-    TE.chainW((user) => pipe(
-      getEntity(id),
-      TE.chainFirstW(isUserAllowedForEntityAsError(user)),
-    ))
+    TE.chainW((user) =>
+      pipe(
+        getEntity(id),
+        TE.chainFirstW(isUserAllowedForEntityAsError(user)),
+      )
+    ),
   );
 ```
 
@@ -476,6 +456,8 @@ export const getEntityForUser = (
 
 Because the `bind`/`bindTo` functions return instances of ADTs (`TaskEither` here), we keep the fail-fast behaviour. In this example, if the `getUser` call returns a `Left<NotFoundError>`, we won't call `getEntity` nor `isUserAllowedForEntityAsError`, it will return the `TaskEither` holding the `NotFoundError`.
 
+*Note*: with the `Do` notation, we gain nest-free pipeline, but you lose point-free programming.
+
 ## Query resolver
 
 Now that we have a safe API, we can move on to the query resolver. We'll first validate the inputs and then query the data.
@@ -502,7 +484,7 @@ Query: {
 },
 ```
 
-The `validateIsNumber` and `validateIsUserId` are functions that return `Either<{ field: string; message: string }, TypeOfTheInput>`. If the input fails the validation, we get an object of field name and validation message in an `Left` either, otherwise we get the input value in the `Right` side.
+The `validateIsNumber` and `validateIsUserId` are functions that return `Either<{ field: string; message: string }, TypeOfTheInput>`. If the input fails the validation, we get an object of field name and validation message in the `Left` side, otherwise we get the input value in the `Right` side.
 
 The `validate` function takes a record of field to validator function and returns either an `InvalidInputError` or an object of input name to input value.
 
