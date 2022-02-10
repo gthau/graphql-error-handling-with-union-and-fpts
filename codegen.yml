@@ -7,16 +7,14 @@ generates:
       - add:
           content: '/* eslint-disable */'
       - add:
-          content: "import { WrappedError } from './src/errors';"
-      - add:
-          content: "import { InputFieldError, InvalidInputError, NotFoundError, NotAllowedError, UnknownError } from './src/errors/wrapped-error';"
+          content: "import * as E from './src/errors';"
       - "typescript"
       - "typescript-resolvers"
     config:
       mappers:
-        InputFieldValidation: 'InputFieldError'
-        InvalidInputError: 'WrappedError<InvalidInputError>'
-        NotFoundError: 'WrappedError<NotFoundError>'
-        NoUserRightsError: 'WrappedError<NoUserRightsError>'
-        UnknownError: 'WrappedError<UnknownError>'
-        Entity: './src/data/types#Entity'
+        InputFieldValidation: 'E.InputFieldError'
+        InvalidInputError: 'E.WrappedError<E.InvalidInputError>'
+        NotFoundError: 'E.WrappedError<E.NotFoundError>'
+        NotAllowedError: 'E.WrappedError<E.NotAllowedError>'
+        UnknownError: 'E.WrappedError<E.UnknownError>'
+        Entity: './src/model/data/entity.data#Entity'
