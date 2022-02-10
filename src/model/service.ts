@@ -18,22 +18,27 @@ export const getUser = (id: UserId): TE.TaskEither<NotFoundError, User> =>
   );
 
 export const getIsUserAllowedForEntity =
-  (user: User, entity: Entity): TE.TaskEither<NotAllowedError, boolean> =>
+  (user: User, entity: Entity): TE.TaskEither<UnknownError, boolean> =>
     TE.tryCatch(
       () => isUserAllowedForEntity(user, entity),
       newErrorWithCause(UnknownError),
+    );
+
+const isNotAllowedAsError = (errorMsg: string) =>
+  (isAllowed: boolean): TE.TaskEither<NotAllowedError, boolean> =>
+    pipe(
+      isAllowed,
+      TE.fromPredicate(
+        Boolean,
+        (_) => new NotAllowedError(errorMsg),
+      ),
     );
 
 export const isUserAllowedForEntityAsError = (user: User) =>
   (entity: Entity): TE.TaskEither<NotAllowedError | UnknownError, boolean> =>
     pipe(
       getIsUserAllowedForEntity(user, entity),
-      TE.chainW(
-        TE.fromPredicate(
-          Boolean,
-          (_) => new NotAllowedError(`User ${user.id} isn't allowed to access entity ${entity.id}`),
-        )
-      ),
+      TE.chainW(isNotAllowedAsError(`User ${user.id} isn't allowed to access entity ${entity.id}`)),
     );
 
 export const getEntityForUser = (id: number, userId: UserId): TE.TaskEither<NotFoundError | NotAllowedError, Entity> =>
