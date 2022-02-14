@@ -456,7 +456,7 @@ export const getEntityForUser = (
 
 Because the `bind`/`bindTo` functions return instances of ADTs (`TaskEither` here), we keep the fail-fast behaviour. In this example, if the `getUser` call returns a `Left<NotFoundError>`, we won't call `getEntity` nor `isUserAllowedForEntityAsError`, it will return the `TaskEither` holding the `NotFoundError`.
 
-*Note*: with the `Do` notation, we gain nest-free pipeline, but you lose point-free programming.
+*Note*: with the `Do` notation, we gain nest-free pipeline, but we lose point-free programming.
 
 ## Query resolver
 
@@ -621,8 +621,8 @@ export const queryResolvers: Resolvers = {
 
   // customized error type resolver
   InvalidInputError: {
-    ...errorTypesCommonResolvers(NotAllowedError),
-    validations: wrappedErrorField(NotAllowedError)('validations'),
+    ...errorTypesCommonResolvers(InvalidInputError),
+    validations: wrappedErrorField(InvalidInputError)('validations'),
   },
 }
 ```
