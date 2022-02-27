@@ -1,4 +1,4 @@
-interface Error {
+interface BaseError {
   message: String!
 }
 
@@ -7,20 +7,20 @@ type InputFieldValidation {
   message: String!
 }
 
-type InvalidInputError implements Error {
+type InvalidInputError implements BaseError {
   message: String!
   inputs: [InputFieldValidation!]!
 }
 
-type NotFoundError implements Error {
+type NotFoundError implements BaseError {
   message: String!
 }
 
-type UnknownError implements Error {
+type UnknownError implements BaseError {
   message: String!
 }
 
-type NotAllowedError implements Error {
+type NotAllowedError implements BaseError {
   message: String!
 }
 
@@ -29,14 +29,15 @@ type Entity {
   name: String!
 }
 
-union EntityResult =
-  | Entity
-  | NotFoundError
-  | NotAllowedError
-  | InvalidInputError
-  | UnknownError
+type EntityResult {
+  entity: Entity
+  notFoundException: NotFoundError
+  notAllowedException: NotAllowedError
+  invalidInputException: InvalidInputError
+  unknownFailure: UnknownError
+}
 
 type Query {
   hello: String!
-  entity(id: ID!, userId: ID!): EntityResult!
+  entity(id: ID!, userId: ID!): EntityResult! @oneOf
 }
