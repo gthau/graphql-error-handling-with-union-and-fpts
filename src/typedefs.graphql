@@ -29,15 +29,14 @@ type Entity {
   name: String!
 }
 
-type EntityResult {
-  entity: Entity
-  notFoundException: NotFoundError
-  notAllowedException: NotAllowedError
-  invalidInputException: InvalidInputError
-  unknownFailure: UnknownError
-}
+union EntityResult =
+  | Entity
+  | NotFoundError
+  | NotAllowedError
+  | InvalidInputError
+  | UnknownError
 
 type Query {
   hello: String!
-  entity(id: ID!, userId: ID!): EntityResult! @oneOf
+  entity(id: ID!, userId: ID!): EntityResult!
 }
