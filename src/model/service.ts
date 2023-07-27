@@ -4,18 +4,25 @@ import { newErrorWithCause, NotAllowedError, NotFoundError, UnknownError } from 
 import { fetchEntity, fetchUser, isUserAllowedForEntity } from './throwing-api';
 import { Entity, User, UserId } from './types';
 
-
 export const getEntity = (id: number): TE.TaskEither<NotFoundError, Entity> =>
   TE.tryCatch(
     () => fetchEntity(id),
     newErrorWithCause(NotFoundError),
   );
 
+export const getEntities = (ids: number[]): TE.TaskEither<NotFoundError, Entity>[] =>
+  ids.map(getEntity);
+
 export const getUser = (id: UserId): TE.TaskEither<NotFoundError, User> =>
   TE.tryCatch(
     () => fetchUser(id),
     newErrorWithCause(NotFoundError),
   );
+
+
+export const getUsers = (ids: UserId[]): TE.TaskEither<NotFoundError, User>[] =>
+  ids.map(getUser);
+
 
 export const getIsUserAllowedForEntity =
   (user: User, entity: Entity): TE.TaskEither<UnknownError, boolean> =>

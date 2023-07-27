@@ -1303,6 +1303,7 @@ __metadata:
     "@graphql-tools/load": ^8.0.0
     "@graphql-tools/schema": ^10.0.0
     "@types/node": 15.14.9
+    dataloader: ^2.2.2
     fp-ts: ^2.16.1
     graphql: ^16.7.1
     graphql-yoga: 4.0.3
