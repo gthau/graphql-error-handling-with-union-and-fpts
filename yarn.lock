@@ -1299,6 +1299,9 @@ __metadata:
     "@graphql-codegen/graphql-modules-preset": 4.0.1
     "@graphql-codegen/typescript": 4.0.1
     "@graphql-codegen/typescript-resolvers": 4.0.1
+    "@graphql-tools/graphql-file-loader": ^8.0.0
+    "@graphql-tools/load": ^8.0.0
+    "@graphql-tools/schema": ^10.0.0
     "@types/node": 15.14.9
     fp-ts: ^2.16.1
     graphql: ^16.7.1
