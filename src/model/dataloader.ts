@@ -6,21 +6,25 @@ import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { ErrorWithCause } from 'pony-cause';
 import { NotFoundError } from '../errors';
-import { getUsers } from './service';
-import { User, UserId } from './types';
+import { getEntities, getUsers } from './service';
+import { Entity, User, UserId } from './types';
 
 
 // (keys: readonly K[]) => PromiseLike<ArrayLike<V | Error>>;
 async function userBatchFn(keys: readonly UserId[]) {
   console.log(`calling userBatchFn with keys=${JSON.stringify(keys)}`);
 
+  // get users as an Array<TE<E, User>> and transform it to Task<Array<User | E>>
   const prog = pipe(
     keys as UserId[],
     getUsers,
-    A.map(TE.foldW(T.of, T.of)),
+    // TaskEither.toUnion: (v: TaskEither<E,A>) => Task<A | E>
+    // same as `TE.foldW(T.of, T.of)` and `TE.getOrElseW(T.of)`
+    A.map(TE.toUnion),
     T.sequenceArray,
   );
 
+  // run pipe (and optionally await) result to satisfy the Dataloader.BatchLoadFn return type (Promise)
   return await prog();
 }
 
@@ -33,11 +37,41 @@ export const userDataloader = new Dataloader<UserId, User | NotFoundError>(
 export const getUsersFromDataloader = (ids: UserId[]): T.Task<E.Either<NotFoundError, User>[]> => {
   return pipe(
     () => userDataloader.loadMany(ids),
-    T.map(A.map(
-      userOrError => userOrError instanceof ErrorWithCause || userOrError instanceof Error
-        ? E.left(userOrError as ErrorWithCause) // Dataloader interface is too loose, we always get the error we return from the batch loading function
-        : E.right(userOrError)
-      )
-    )
+    T.map(A.map(eitherFromDataloaderResult<NotFoundError, User>))
   );
 }
+
+// (keys: readonly K[]) => PromiseLike<ArrayLike<V | Error>>;
+async function entityBatchFn(keys: readonly number[]) {
+  console.log(`calling entityBatchFn with keys=${JSON.stringify(keys)}`);
+
+  const prog = pipe(
+    keys as number[],
+    getEntities,
+    T.map(A.map(E.toUnion))
+  );
+
+  return await prog();
+}
+
+export const entityDataloader = new Dataloader<number, Entity | NotFoundError>(
+  entityBatchFn, {
+    batch: true,
+    cache: true,
+  });
+
+export const getEntitiesFromDataloader = (ids: number[]): T.Task<E.Either<NotFoundError, Entity>[]> => {
+  return pipe(
+    () => entityDataloader.loadMany(ids),
+    T.map(A.map(eitherFromDataloaderResult<NotFoundError, Entity>)),
+  );
+}
+
+const eitherFromDataloaderResult =
+  <SpecificError extends ErrorWithCause<Error>, T>(
+    valueOrError: T | SpecificError | Error,
+  ): E.Either<SpecificError, T> => {
+    return valueOrError instanceof ErrorWithCause || valueOrError instanceof Error
+      ? E.left(valueOrError as SpecificError) // Dataloader interface is too loose, we always get the error we return from the batch loading function
+      : E.right(valueOrError)
+  };

@@ -50,5 +50,6 @@ union UserResult =
 type Query {
   hello: String!
   entity(id: ID!, userId: ID!): EntityResult!
+  entities(ids: [ID!]): [EntityResult!]!
   users(ids: [ID!]!): [UserResult!]
 }

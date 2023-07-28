@@ -7,7 +7,7 @@ import { ErrorWithCause } from 'pony-cause';
 import { InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
 import { Type, isWrappedError, taskWrappedError, wrappedError, wrappedErrorField } from '../errors/wrapped-error';
 import { Resolvers } from '../generated/graphql';
-import { getUsersFromDataloader } from '../model/dataloader';
+import { getEntitiesFromDataloader, getUsersFromDataloader } from '../model/dataloader';
 import { getEntityForUser } from '../model/service';
 import { Entity, User } from '../model/types';
 import { validate, validateIsNumber, validateIsUserId } from './validation';
@@ -37,6 +37,17 @@ export const queryResolvers: Resolvers = {
           taskWrappedError,
           T.of,
         )
+      )();
+    },
+
+    entities: (_, args, __) => {
+      const { ids } = args;
+
+      return pipe(
+        ids,
+        A.map(Number),
+        getEntitiesFromDataloader,
+        T.map(A.map(E.getOrElseW(wrappedError)))
       )();
     },
 
