@@ -5,7 +5,7 @@ import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { ErrorWithCause } from 'pony-cause';
-import { NotFoundError } from '../errors';
+import { ConnectionError, NotFoundError } from '../errors';
 import { getEntities, getUsers } from './service';
 import { Entity, User, UserId } from './types';
 
@@ -31,7 +31,11 @@ async function userBatchFn(keys: readonly UserId[]) {
 export const userDataloader = new Dataloader<UserId, User | NotFoundError>(
   userBatchFn, {
     batch: true,
-    cache: true,
+    // if we enable the cache, then we must deal with invalidation of the errors, e.g. not cache indefinitely:
+    // - ConnectionErrors, which are temporary and can be cached with low TTL
+    // - NotFoundError, which can be invalidated by listening to Entity creation events (e.g. from Redis, MQ, DB logs tailing, etc.)
+    // it is not the purpose of this demo project to demonstrate this
+    cache: false,
   });
 
 export const getUsersFromDataloader = (ids: UserId[]): T.Task<E.Either<NotFoundError, User>[]> => {
@@ -48,22 +52,28 @@ async function entityBatchFn(keys: readonly number[]) {
   const prog = pipe(
     keys as number[],
     getEntities,
-    T.map(A.map(E.toUnion))
+    TE.map(A.map(E.toUnion)),
+    TE.mapLeft((e) => A.replicate(keys.length, e)),
+    TE.toUnion,
   );
 
   return await prog();
 }
 
-export const entityDataloader = new Dataloader<number, Entity | NotFoundError>(
+export const entityDataloader = new Dataloader<number, Entity | NotFoundError | ConnectionError>(
   entityBatchFn, {
     batch: true,
-    cache: true,
+    // if we enable the cache, then we must deal with invalidation of the errors, e.g. not cache indefinitely:
+    // - ConnectionErrors, which are temporary and can be cached with low TTL
+    // - NotFoundError, which can be invalidated by listening to Entity creation events (e.g. from Redis, MQ, DB logs tailing, etc.)
+    // it is not the purpose of this demo project to demonstrate this
+    cache: false,
   });
 
-export const getEntitiesFromDataloader = (ids: number[]): T.Task<E.Either<NotFoundError, Entity>[]> => {
+export const getEntitiesFromDataloader = (ids: number[]): T.Task<E.Either<NotFoundError | ConnectionError, Entity>[]> => {
   return pipe(
     () => entityDataloader.loadMany(ids),
-    T.map(A.map(eitherFromDataloaderResult<NotFoundError, Entity>)),
+    T.map(A.map(eitherFromDataloaderResult<NotFoundError | ConnectionError, Entity>)),
   );
 }
 

@@ -1,9 +1,8 @@
 import * as A from 'fp-ts/lib/Array';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
-import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
-import { newErrorWithCause, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
+import { ConnectionError, newErrorWithCause, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
 import { fetchEntities, fetchEntity, fetchUser, isUserAllowedForEntity } from './throwing-api';
 import { Entity, User, UserId } from './types';
 
@@ -13,23 +12,29 @@ export const getEntity = (id: number): TE.TaskEither<NotFoundError, Entity> =>
     newErrorWithCause(NotFoundError),
   );
 
-export const getEntities = (ids: number[]): T.Task<E.Either<NotFoundError, Entity>[]> =>
+export const getEntities = (ids: number[]): TE.TaskEither<ConnectionError, E.Either<NotFoundError, Entity>[]> =>
   pipe(
-    () => fetchEntities(ids),
-    T.map(A.map((entityOrError) =>
+    TE.tryCatch(
+      () => fetchEntities(ids),
+      newErrorWithCause(ConnectionError),
+    ),
+    TE.map(A.map((entityOrError) =>
       entityOrError instanceof Entity
         ? E.right(entityOrError)
-        : E.left(newErrorWithCause(NotFoundError)(entityOrError)))),
+        : E.left(newErrorWithCause(NotFoundError)(entityOrError)
+    ))),
   );
 
-export const getUser = (id: UserId): TE.TaskEither<NotFoundError, User> =>
+export const getUser = (id: UserId): TE.TaskEither<NotFoundError | ConnectionError, User> =>
   TE.tryCatch(
     () => fetchUser(id),
-    newErrorWithCause(NotFoundError),
+    (e) => newErrorWithCause(
+      e instanceof NotFoundError ? NotFoundError : ConnectionError
+    )(e as Error),
   );
 
 
-export const getUsers = (ids: UserId[]): TE.TaskEither<NotFoundError, User>[] =>
+export const getUsers = (ids: UserId[]): TE.TaskEither<NotFoundError | ConnectionError, User>[] =>
   ids.map(getUser);
 
 

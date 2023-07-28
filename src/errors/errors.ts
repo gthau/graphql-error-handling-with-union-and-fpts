@@ -4,6 +4,7 @@ import { Type } from './wrapped-error';
 export class NotFoundError extends ErrorWithCause<Error> { }
 export class NotAllowedError extends ErrorWithCause<Error> { }
 export class UnknownError extends ErrorWithCause<Error> { }
+export class ConnectionError extends ErrorWithCause<Error> { }
 
 export type InputFieldError = { field: NonNullable<string>; message: NonNullable<string> };
 export type InputFieldErrors = Array<InputFieldError>;

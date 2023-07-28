@@ -17,4 +17,5 @@ generates:
         NotFoundError: 'E.WrappedError<E.NotFoundError>'
         NotAllowedError: 'E.WrappedError<E.NotAllowedError>'
         UnknownError: 'E.WrappedError<E.UnknownError>'
+        ConnectionError: 'E.WrappedError<E.ConnectionError>'
         Entity: './src/model/data/entity.data#Entity'
