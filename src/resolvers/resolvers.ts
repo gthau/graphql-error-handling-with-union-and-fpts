@@ -4,7 +4,7 @@ import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
 import { ErrorWithCause } from 'pony-cause';
-import { InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
+import { ConnectionError, InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
 import { Type, isWrappedError, taskWrappedError, wrappedError, wrappedErrorField } from '../errors/wrapped-error';
 import { Resolvers } from '../generated/graphql';
 import { getEntitiesFromDataloader, getUsersFromDataloader } from '../model/dataloader';
@@ -78,6 +78,7 @@ export const queryResolvers: Resolvers = {
   NotFoundError: errorTypesCommonResolvers(NotFoundError),
   NotAllowedError: errorTypesCommonResolvers(NotAllowedError),
   UnknownError: errorTypesCommonResolvers(UnknownError),
+  ConnectionError: errorTypesCommonResolvers(ConnectionError),
   InvalidInputError: {
     ...errorTypesCommonResolvers(InvalidInputError),
     inputs: wrappedErrorField(InvalidInputError)('validations'),

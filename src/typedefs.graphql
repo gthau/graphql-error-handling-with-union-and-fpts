@@ -24,6 +24,10 @@ type NotAllowedError implements BaseError {
   message: String!
 }
 
+type ConnectionError implements BaseError {
+  message: String!
+}
+
 type Entity {
   id: ID!
   name: String!
@@ -35,6 +39,7 @@ union EntityResult =
   | NotAllowedError
   | InvalidInputError
   | UnknownError
+  | ConnectionError
 
 type User {
   id: ID!

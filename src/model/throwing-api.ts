@@ -1,3 +1,4 @@
+import { ConnectionError } from '../errors';
 import { entities } from './data/entity.data';
 import { users } from './data/user.data';
 import { Entity, User, UserId } from './types';
@@ -9,6 +10,11 @@ export const fetchEntity = async (id: number): Promise<Entity> => {
 }
 
 export const fetchEntities = async (ids: number[]): Promise<(Entity | Error)[]> => {
+  // simulate an API failure, such as Connectivity issue
+  if (ids.includes(9999)) {
+    throw new ConnectionError('SDK Failure: fetch entities');
+  }
+
   return ids.map(id => {
     const entity = entities.find(e => e.id === id);
     return entity ? new Entity(entity) : new Error(`Entity ${id} not found`);
