@@ -36,7 +36,20 @@ union EntityResult =
   | InvalidInputError
   | UnknownError
 
+type User {
+  id: ID!
+  name: String!
+  country: String!
+}
+
+union UserResult =
+  | User
+  | NotFoundError
+  | UnknownError
+
 type Query {
   hello: String!
   entity(id: ID!, userId: ID!): EntityResult!
+  entities(ids: [ID!]): [EntityResult!]!
+  users(ids: [ID!]!): [UserResult!]
 }

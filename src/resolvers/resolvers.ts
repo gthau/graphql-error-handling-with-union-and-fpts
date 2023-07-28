@@ -1,12 +1,15 @@
-import { pipe } from 'fp-ts/lib/function';
+import * as A from 'fp-ts/lib/Array';
+import * as E from 'fp-ts/lib/Either';
 import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/lib/function';
 import { ErrorWithCause } from 'pony-cause';
 import { InvalidInputError, NotAllowedError, NotFoundError, UnknownError } from '../errors/errors';
-import { isWrappedError, taskWrappedError, Type, wrappedErrorField } from '../errors/wrapped-error';
+import { Type, isWrappedError, taskWrappedError, wrappedError, wrappedErrorField } from '../errors/wrapped-error';
 import { Resolvers } from '../generated/graphql';
+import { getEntitiesFromDataloader, getUsersFromDataloader } from '../model/dataloader';
 import { getEntityForUser } from '../model/service';
-import { Entity } from '../model/types';
+import { Entity, User } from '../model/types';
 import { validate, validateIsNumber, validateIsUserId } from './validation';
 
 const errorTypesCommonResolvers = <E extends ErrorWithCause<Error>>(errorClass: Type<E>) => ({
@@ -35,6 +38,27 @@ export const queryResolvers: Resolvers = {
           T.of,
         )
       )();
+    },
+
+    entities: (_, args, __) => {
+      const { ids } = args;
+
+      return pipe(
+        ids,
+        A.map(Number),
+        getEntitiesFromDataloader,
+        T.map(A.map(E.getOrElseW(wrappedError)))
+      )();
+    },
+
+    users: (_, args, __) => {
+      const { ids } = args;
+
+      return pipe(
+        ids,
+        getUsersFromDataloader,
+        T.map(A.map(E.getOrElseW(wrappedError)))
+      )();
     }
   },
 
@@ -42,6 +66,13 @@ export const queryResolvers: Resolvers = {
     __isTypeOf: (parent) => parent instanceof Entity,
     id: (parent) => String(parent.id),
     name: (parent) => parent.name,
+  },
+
+  User: {
+    __isTypeOf: (parent) => parent instanceof User,
+    id: (parent) => String(parent.id),
+    name: (parent) => parent.name,
+    country: (parent) => parent.country,
   },
 
   NotFoundError: errorTypesCommonResolvers(NotFoundError),
