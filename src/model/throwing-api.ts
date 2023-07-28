@@ -22,6 +22,11 @@ export const fetchEntities = async (ids: number[]): Promise<(Entity | Error)[]> 
 }
 
 export const fetchUser = async (id: UserId): Promise<User> => {
+  // simulate an API failure, such as Connectivity issue
+  if (id === 'u-9999') {
+    throw new ConnectionError('SDK Failure: fetch user');
+  }
+
   const user = users.find(u => u.id === id);
   if (!user) throw new Error(`User ${id} not found`);
   return new User(user);

@@ -51,6 +51,7 @@ union UserResult =
   | User
   | NotFoundError
   | UnknownError
+  | ConnectionError
 
 type Query {
   hello: String!

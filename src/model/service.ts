@@ -25,14 +25,16 @@ export const getEntities = (ids: number[]): TE.TaskEither<ConnectionError, E.Eit
     ))),
   );
 
-export const getUser = (id: UserId): TE.TaskEither<NotFoundError, User> =>
+export const getUser = (id: UserId): TE.TaskEither<NotFoundError | ConnectionError, User> =>
   TE.tryCatch(
     () => fetchUser(id),
-    newErrorWithCause(NotFoundError),
+    (e) => newErrorWithCause(
+      e instanceof NotFoundError ? NotFoundError : ConnectionError
+    )(e as Error),
   );
 
 
-export const getUsers = (ids: UserId[]): TE.TaskEither<NotFoundError, User>[] =>
+export const getUsers = (ids: UserId[]): TE.TaskEither<NotFoundError | ConnectionError, User>[] =>
   ids.map(getUser);
 
 
